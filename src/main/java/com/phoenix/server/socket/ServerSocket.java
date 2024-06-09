@@ -13,6 +13,7 @@ import jakarta.websocket.server.ServerEndpoint;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.UUID;
 
 @ServerEndpoint("/remote")
@@ -41,35 +42,28 @@ public class ServerSocket {
         Client.removeClient(userSession);
     }
 
-//    @OnMessage
-//    public void onMessage(String message) {
-//
-//        Message m = new Gson().fromJson(message, Message.class);
-//        if (!Objects.equals(m.getFrom(), m.getTo())) {
-//            switch (m.getType()) {
-//                case CONNECTION:
-//                    ClientMapping.setMappings(m.getFrom(), m.getTo());
-//                    Session host = Client.getSession(m.getTo());
-//
-//                    Message m2 = new Message();
-//                    m2.setType(Type.TO_HOST);
-//                    m2.setFrom(m.getFrom());
-//                    try {
-//                        host.getBasicRemote().sendText(new Gson().toJson(m2));
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                    break;
-//
-//            }
-//        }
-//
-//
-//    }
     @OnMessage
-    public void onMessage(Message m) {
+    public void onMessage(String message) {
 
-        System.out.println(m);
+        Message m = new Gson().fromJson(message, Message.class);
+        if (!Objects.equals(m.getFrom(), m.getTo())) {
+            switch (m.getType()) {
+                case CONNECTION:
+                    ClientMapping.setMappings(m.getFrom(), m.getTo());
+                    Session host = Client.getSession(m.getTo());
+
+                    Message m2 = new Message();
+                    m2.setType(Type.TO_HOST);
+                    m2.setFrom(m.getFrom());
+                    try {
+                        host.getBasicRemote().sendText(new Gson().toJson(m2));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+
+            }
+        }
 
 
     }
